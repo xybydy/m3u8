@@ -332,11 +332,14 @@ func (p *MediaPlaylist) Remove() (err error) {
 
 // Append general chunk to the tail of chunk slice for a media playlist.
 // This operation does reset playlist cache.
-func (p *MediaPlaylist) Append(uri string, duration float64, title string) error {
+func (p *MediaPlaylist) Append(uri string, duration float64, title string, tags []*CustomTag) error {
 	seg := new(MediaSegment)
 	seg.URI = uri
 	seg.Duration = duration
 	seg.Title = title
+	if len(tags) > 0 {
+		seg.CustomTags = tags
+	}
 	return p.AppendSegment(seg)
 }
 
@@ -363,11 +366,11 @@ func (p *MediaPlaylist) AppendSegment(seg *MediaSegment) error {
 // Combines two operations: firstly it removes one chunk from the head of chunk slice and move pointer to
 // next chunk. Secondly it appends one chunk to the tail of chunk slice. Useful for sliding playlists.
 // This operation does reset cache.
-func (p *MediaPlaylist) Slide(uri string, duration float64, title string) {
+func (p *MediaPlaylist) Slide(uri string, duration float64, title string, cTags []*CustomTag) {
 	if !p.Closed && p.count >= p.winsize {
 		p.Remove()
 	}
-	p.Append(uri, duration, title)
+	p.Append(uri, duration, title, cTags)
 }
 
 // Reset playlist cache. Next called Encode() will regenerate playlist from the chunk slice.
@@ -648,6 +651,10 @@ func (p *MediaPlaylist) Encode() *bytes.Buffer {
 				durationCache[seg.Duration] = strconv.FormatFloat(seg.Duration, 'f', 3, 32)
 			}
 			p.buf.WriteString(durationCache[seg.Duration])
+		}
+		for _, tag := range seg.CustomTags {
+			t := fmt.Sprintf(` %s="%s"`, tag.Key, tag.Value)
+			p.buf.WriteString(t)
 		}
 		p.buf.WriteRune(',')
 		p.buf.WriteString(seg.Title)

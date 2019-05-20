@@ -1,0 +1,13 @@
+#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-MEDIA-SEQUENCE:0
+#EXTINF:-1 tvg-id="movie0.id" tvg-name="MOVIE 0" tvg-logo="movie0.jpg" group-title="MOVIE_GROUP",Movie 0
+movie0.ts
+#EXTINF:-1 tvg-id="movie1.id" tvg-name="MOVIE 1" tvg-logo="movie1.jpg" group-title="MOVIE_GROUP",Movie 1
+movie1.ts
+#EXTINF:-1 tvg-id="movie2.id" tvg-name="MOVIE 2" tvg-logo="movie2.jpg" group-title="MOVIE_GROUP",Movie 2
+movie2.ts
+#EXTINF:-1 tvg-id="movie3.id" tvg-name="MOVIE 3" tvg-logo="movie3.jpg" group-title="MOVIE_GROUP",Movie 3
+movie3.ts
+#EXTINF:-1 tvg-id="movie4.id" tvg-name="MOVIE 4" tvg-logo="movie4.jpg" group-title="MOVIE_GROUP",Movie 4
+movie4.ts

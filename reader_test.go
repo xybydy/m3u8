@@ -150,7 +150,7 @@ func TestDecodeMediaPlaylistByteRange(t *testing.T) {
 		{URI: "video.ts", Duration: 10, Limit: 69864, SeqId: 2},
 	}
 	for i, seg := range p.Segments {
-		if *seg != *expected[i] {
+		if !reflect.DeepEqual(*seg, *expected[i]) {
 			t.Errorf("exp: %+v\ngot: %+v", expected[i], seg)
 		}
 	}
@@ -735,6 +735,54 @@ func TestDecodeMediaPlaylistStartTime(t *testing.T) {
 	}
 	if pp.StartTime != float64(8.0) {
 		t.Errorf("Media segment StartTime != 8: %f", pp.StartTime)
+	}
+}
+
+func TestDecodeMediaPlaylistCustomTags(t *testing.T) {
+	f, err := os.Open("sample-playlists/media-playlist-customtags.m3u8")
+	if err != nil {
+		t.Fatal(err)
+	}
+	p, err := NewMediaPlaylist(5, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = p.DecodeFrom(bufio.NewReader(f), false)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if p.Count() != 5 {
+		t.Error("Item count does not equals to 5")
+	}
+
+	for index, item := range p.Segments {
+		for _, k := range item.CustomTags {
+			switch k.Key {
+			case "tvg-id":
+				want := fmt.Sprintf("movie%d.id", index)
+				if want != k.Value {
+					t.Errorf("tvg-id not correct. want: %s - got: %s", want, k.Value)
+				}
+			case "tvg-name":
+				want := fmt.Sprintf("MOVIE %d", index)
+				if want != k.Value {
+					t.Errorf("tvg-name not correct. want: %s - got: %s", want, k.Value)
+				}
+			case "tvg-logo":
+				want := fmt.Sprintf("movie%d.jpg", index)
+				if want != k.Value {
+					t.Errorf("tvg-logo not correct. want: %s - got: %s", want, k.Value)
+				}
+			case "group-title":
+				want := "MOVIE_GROUP"
+				if want != k.Value {
+					t.Errorf("group-title not correct. want: %s - got: %s", want, k.Value)
+				}
+
+			}
+
+		}
 	}
 }
 

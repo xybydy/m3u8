@@ -400,9 +400,15 @@ func decodeLineOfMediaPlaylist(p *MediaPlaylist, wv *WV, state *decodingState, l
 		if len(line) > sepIndex {
 			state.title = line[sepIndex+1:]
 		}
+
+		state.cTags = nil //make sure state.cTags is an empty slice
+		for k, v := range decodeParamsLine(line) {
+			state.cTags = append(state.cTags, &CustomTag{k, v})
+		}
+
 	case !strings.HasPrefix(line, "#"):
 		if state.tagInf {
-			err := p.Append(line, state.duration, state.title)
+			err := p.Append(line, state.duration, state.title, state.cTags)
 			if err == ErrPlaylistFull {
 				// Extend playlist by doubling size, reset internal state, try again.
 				// If the second Append fails, the if err block will handle it.
@@ -411,7 +417,7 @@ func decodeLineOfMediaPlaylist(p *MediaPlaylist, wv *WV, state *decodingState, l
 				p.Segments = append(p.Segments, make([]*MediaSegment, p.Count())...)
 				p.capacity = uint(len(p.Segments))
 				p.tail = p.count
-				err = p.Append(line, state.duration, state.title)
+				err = p.Append(line, state.duration, state.title, state.cTags)
 			}
 			// Check err for first or subsequent Append()
 			if err != nil {
